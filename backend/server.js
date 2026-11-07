@@ -1,4 +1,5 @@
 import express from 'express';
+import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 const PORT = 3000;
@@ -10,9 +11,11 @@ const TYPES = [
   'ISTP', 'ISFP', 'ESTP', 'ESFP',
 ];
 
-// Temporary storage: lives in the server's memory, so it's wiped when the
-// server restarts. Step 4 replaces this with Supabase.
-const people = [];
+const CONFIDENCE_LEVELS = ['certain', 'confident', 'unsure'];
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SECRET_KEY
+);
 
 // Let the server read JSON sent by the browser (request.body).
 app.use(express.json());
@@ -21,34 +24,73 @@ app.use(express.json());
 app.use(express.static(import.meta.dirname + '/../frontend'));
 
 
+// Turn a value into trimmed text, or '' if it isn't text.
+function cleanText(value) {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+  return '';
+}
+
 // GET /people -> send back everyone.
-function getPeople(request, response) {
-  response.json(people);
+async function getPeople(request, response) {
+  const result = await supabase
+    .from('main')
+    .select('name, mbti, typer, confidence')
+    .order('created_at', {ascending: true});
+  
+  if (result.error) {
+    console.error(result.error);
+    response.status(500).json({error: 'Could not load people.'});
+    return;
+  }
+
+  response.json(result.data);
 }
 
 // POST /people -> add one person.
-function addPerson(request, response) {
+async function addPerson(request, response) {
   const body = request.body || {};
 
-  let name = '';
-  if (typeof body.name === 'string') {
-    name = body.name.trim();
-  }
-  const type = body.type;
+  const name = cleanText(body.name);
+  const mbti = cleanText(body.mbti);
+  const typer = cleanText(body.typer);
+  const confidence = cleanText(body.confidence);
 
   // Never trust the browser: check the data here too.
   if (name === '') {
     response.status(400).json({ error: 'Name is required.' });
     return;
   }
-  if (!TYPES.includes(type)) {
+  if (!TYPES.includes(mbti)) {
     response.status(400).json({ error: 'Type must be one of the 16 types.' });
     return;
   }
+  if (typer === '') {
+    response.status(400).json({ error: 'Typed by is required.' });
+    return;
+  }
+  if (!CONFIDENCE_LEVELS.includes(confidence)) {
+    response.status(400).json({ error: 'Confidence must be certain, confident or unsure.' });
+    return;
+  }
 
-  const person = { name: name, type: type };
-  people.push(person);
-  response.status(201).json(person);
+  const newPerson = { name: name, mbti: mbti, typer: typer, confidence: confidence};
+
+  const result = await supabase
+    .from('main')
+    .insert(newPerson)
+    .select('name, mbti, typer, confidence')
+    .single();
+
+  if (result.error) {
+    console.error(result.error);
+    response.status(500).json({error: 'Could not save person'});
+    return;
+  }
+
+  response.status(201).json(results.data);
+
 }
 
 // Runs once, when the server has started.

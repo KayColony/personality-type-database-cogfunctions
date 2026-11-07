@@ -1,0 +1,15 @@
+{
+  "name": "personality-type-database",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An app where you can contribute and lookup accurate type information of the human race.",
+  "main": "backend/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js"
+  },
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}

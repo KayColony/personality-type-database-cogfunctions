@@ -8,4 +8,5 @@ There are two other companies building similar products. The first is "Personali
 
 My focus is as follows. the people in the database to be the everyday person rather than celebrities. There is much more value to be had knowing your friend's type compared to knowing Justin Beiber's type. This tool could potentially serve as a conduit for raising awareness about type at a grassroots level. In this process, I am optimising for accuracy. 
 
-To begin with I will work on creating a simple UI where a user can enter a person and their associated MBTI. 
+To begin with I will work on creating a simple UI where a user can enter a person and their associated MBTI. This will then be saved to a personal database which can be shared if the user wants to with others. This may just be useful to me as I would like to collaborate with the people I know to type the people we know! But I hope this use case may be useful to others too.
+

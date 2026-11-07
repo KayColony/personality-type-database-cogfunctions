@@ -2,7 +2,7 @@ import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const TYPES = [
   'INTJ', 'INTP', 'ENTJ', 'ENTP',
@@ -17,9 +17,9 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
+app.use(requirePassword);
 // Let the server read JSON sent by the browser (request.body).
 app.use(express.json());
-
 // Hand out the files in frontend/ (index.html, app.js) to the browser.
 app.use(express.static(import.meta.dirname + '/../frontend'));
 
@@ -30,6 +30,23 @@ function cleanText(value) {
     return value.trim();
   }
   return '';
+}
+
+function requirePassword(request, response, next) {
+  const header = request.headers.authorization || '';
+
+  const encoded = header.replace('Basic ', '');
+  const decoded = Buffer.from(encoded, 'base64').toString();
+  const password = decoded.slice(decoded.indexOf(':') + 1);
+
+  if (password === process.env.APP_PASSWORD) {
+    next();
+    return;
+  }
+
+  // Wrong or missing: ask the browser to show its password popup.
+    response.set('WWW-Authenticate', 'Basic realm="Type Database"');
+    response.status(401).send('Password required.');
 }
 
 // GET /people -> send back everyone.
@@ -89,7 +106,7 @@ async function addPerson(request, response) {
     return;
   }
 
-  response.status(201).json(results.data);
+  response.status(201).json(result.data);
 
 }
 

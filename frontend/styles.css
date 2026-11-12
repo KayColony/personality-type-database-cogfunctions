@@ -134,7 +134,9 @@ h1 {
   display: inline-block;
   padding: 3px 7px;
   border-radius: 999px;
+  font-family: var(--sans);
   font-size: 11.5px;
+  letter-spacing: 0;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -147,6 +149,11 @@ h1 {
 .pill-confident {
   background: var(--confident);
   color: #14532d;   /* dark green text, readable on the light background */
+}
+
+.pill-split {
+  background: var(--ink);
+  color: #ffffff;
 }
 
 .pill-unsure {
@@ -325,26 +332,94 @@ h1 {
   margin: 0 auto;
 }
 
-/* ---------- Temporary add pop-up ---------- */
-.add-dialog {
-  width: min(440px, calc(100% - 32px));
-  padding: 28px 24px 24px;
-  border: 1px solid var(--ink);
-  border-radius: 0;
+/* ---------- Clickable rows ---------- */
+#people-rows tr {
+  cursor: pointer;
 }
 
-.add-dialog::backdrop {
+#people-rows tr:hover td {
+  background: #fafafa;
+}
+
+/* The name is a real button, so the keyboard can reach each row. */
+.name-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Several types (a split) stack one per line. */
+.type-line {
+  display: block;
+}
+
+/* ---------- Sheets (the add and person panels) ---------- */
+/* On a phone they slide up from the bottom; on a laptop they sit in the middle. */
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 92vh;
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.sheet::backdrop {
   background: rgba(17, 17, 17, 0.45);
 }
 
-.add-form h2 {
-  margin: 0 0 8px;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: 32px;
+@media (min-width: 640px) {
+  .sheet {
+    margin: auto;
+    border: 1px solid var(--ink);
+  }
 }
 
-.add-form label {
+.sheet-body {
+  padding: 20px 20px 28px;
+}
+
+.sheet-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sheet h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.1;
+}
+
+.small {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.icon-button {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.field-label {
   display: block;
   margin-top: 16px;
   color: var(--muted);
@@ -353,8 +428,13 @@ h1 {
   text-transform: uppercase;
 }
 
-.add-form input,
-.add-form select {
+.optional {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.field {
+  display: block;
   width: 100%;
   height: 44px;
   margin-top: 6px;
@@ -364,6 +444,131 @@ h1 {
   background: var(--paper);
   color: var(--ink);
   font: inherit;
+}
+
+.notes-field {
+  height: auto;
+  padding: 10px 12px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.section-label {
+  margin-top: 24px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink);
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------- Matching names in the add form ---------- */
+.matches {
+  margin-top: 4px;
+}
+
+.match-button {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  margin-top: 6px;
+  border: 1px dashed var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  align-items: center;
+  cursor: pointer;
+}
+
+.match-button .muted {
+  font-size: 12px;
+}
+
+/* ---------- One person's panel ---------- */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 26px;
+  letter-spacing: 0.08em;
+}
+
+.typing {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.typing.editing {
+  background: #f6f6f6;
+  margin: 0 -20px;
+  padding: 14px 20px;
+}
+
+.typing-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.typing-who {
+  font-weight: 600;
+}
+
+.typing-what {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
+.typing-notes {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.typing-bottom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.typing-bottom .muted {
+  flex-grow: 1;
+  font-size: 12px;
+}
+
+.text-button {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.typing-form {
+  margin-top: 8px;
+}
+
+.person-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 28px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
 }
 
 .form-buttons {

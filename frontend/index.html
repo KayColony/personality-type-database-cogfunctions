@@ -52,51 +52,90 @@
     </div>
   </main>
 
-  <!-- Temporary: the add form opens in a pop-up until we design the add page. -->
-  <dialog id="add-dialog" class="add-dialog">
-    <form id="person-form" class="add-form">
-      <h2>New person</h2>
 
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" required autocomplete="off">
+  <!-- ========== Add a new person (with their first typing) ========== -->
+  <dialog id="add-dialog" class="sheet">
+    <form id="add-form" class="sheet-body">
+      <div class="sheet-top">
+        <h2>New person</h2>
+        <button type="button" class="icon-button" data-close aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </div>
 
-      <label for="type">Type</label>
-      <select id="type" name="type" required>
-        <option value="">Choose a type</option>
-        <option>INTJ</option>
-        <option>INTP</option>
-        <option>ENTJ</option>
-        <option>ENTP</option>
-        <option>INFJ</option>
-        <option>INFP</option>
-        <option>ENFJ</option>
-        <option>ENFP</option>
-        <option>ISTJ</option>
-        <option>ISFJ</option>
-        <option>ESTJ</option>
-        <option>ESFJ</option>
-        <option>ISTP</option>
-        <option>ISFP</option>
-        <option>ESTP</option>
-        <option>ESFP</option>
-      </select>
+      <label for="add-name" class="field-label">Name</label>
+      <input type="text" id="add-name" class="field" required autocomplete="off" maxlength="100">
 
-      <label for="typer">Typed by</label>
-      <input type="text" id="typer" name="typer" required>
+      <!-- Existing people whose names match what's being typed. -->
+      <div id="add-matches" class="matches" hidden>
+        <div class="field-label">Already here? Tap to open them instead</div>
+        <div id="add-matches-list"></div>
+      </div>
 
-      <label for="confidence">Confidence</label>
-      <select id="confidence" name="confidence" required>
-        <option value="">How sure are you?</option>
-        <option value="Certain">Certain</option>
-        <option value="Confident">Confident</option>
-        <option value="Unsure">Unsure</option>
-      </select>
+      <label for="add-typer" class="field-label">Typed by</label>
+      <input type="text" id="add-typer" class="field" required autocomplete="off">
+
+      <label for="add-type" class="field-label">Type</label>
+      <select id="add-type" class="field type-select" required></select>
+
+      <label for="add-confidence" class="field-label">Confidence</label>
+      <select id="add-confidence" class="field confidence-select" required></select>
+
+      <label for="add-notes" class="field-label">Notes <span class="optional">optional</span></label>
+      <textarea id="add-notes" class="field notes-field" rows="3" maxlength="2000"></textarea>
 
       <div class="form-buttons">
-        <button type="button" id="cancel-add" class="secondary">Cancel</button>
+        <button type="button" class="secondary" data-close>Cancel</button>
         <button type="submit" class="primary">Save</button>
       </div>
     </form>
+  </dialog>
+
+
+  <!-- ========== One person: all their typings ========== -->
+  <dialog id="person-dialog" class="sheet">
+    <div class="sheet-body">
+      <div class="sheet-top">
+        <div>
+          <h2 id="person-name"></h2>
+          <p id="person-meta" class="muted small"></p>
+        </div>
+        <button type="button" class="icon-button" data-close aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </div>
+
+      <div id="person-summary" class="summary"></div>
+
+      <div class="section-label">Typings</div>
+      <div id="typing-list" class="typing-list"></div>
+
+      <form id="typing-form" class="typing-form">
+        <div id="typing-form-title" class="section-label">Add your typing</div>
+
+        <label for="typing-typer" class="field-label">Typed by</label>
+        <input type="text" id="typing-typer" class="field" required autocomplete="off">
+
+        <label for="typing-type" class="field-label">Type</label>
+        <select id="typing-type" class="field type-select" required></select>
+
+        <label for="typing-confidence" class="field-label">Confidence</label>
+        <select id="typing-confidence" class="field confidence-select" required></select>
+
+        <label for="typing-notes" class="field-label">Notes <span class="optional">optional</span></label>
+        <textarea id="typing-notes" class="field notes-field" rows="3" maxlength="2000"></textarea>
+
+        <div class="form-buttons">
+          <button type="button" id="cancel-edit" class="secondary" hidden>Cancel</button>
+          <button type="submit" id="typing-save" class="primary">Add typing</button>
+        </div>
+      </form>
+
+      <div class="person-actions">
+        <button type="button" id="rename-person" class="text-button">Rename</button>
+        <button type="button" id="delete-person" class="text-button">Delete person</button>
+      </div>
+    </div>
   </dialog>
 
   <script src="app.js"></script>

@@ -22,6 +22,16 @@ const menuSortButtons = columnMenu.querySelectorAll('.menu-sort');
 const menuOptions = document.getElementById('menu-options');
 const menuClearButton = document.getElementById('menu-clear');
 
+// The two views
+const viewTabs = document.querySelectorAll('.view-switch [role="tab"]');
+const databaseView = document.getElementById('database-view');
+const typesView = document.getElementById('types-view');
+const typesTyperSelect = document.getElementById('types-typer');
+const typeGrid = document.getElementById('type-grid');
+const typeTitle = document.getElementById('type-title');
+const typeCount = document.getElementById('type-count');
+const typePeople = document.getElementById('type-people');
+
 // Add-person sheet
 const addDialog = document.getElementById('add-dialog');
 const addForm = document.getElementById('add-form');
@@ -61,6 +71,14 @@ const TYPES = [
 ];
 const CONFIDENCE_LEVELS = ['Certain', 'Confident', 'Unsure'];
 
+// The order of the 16-type grid: top-left, across, then down.
+const TYPE_GRID_ORDER = [
+  'ESTJ', 'ESTP', 'ENTJ', 'ENFJ',
+  'ESFJ', 'ESFP', 'ENTP', 'ENFP',
+  'ISTJ', 'ISTP', 'INTJ', 'INFJ',
+  'ISFJ', 'ISFP', 'INTP', 'INFP',
+];
+
 // "Sure" sorts by how sure. A split (people disagree on the type) comes last.
 const CONFIDENCE_ORDER = { Certain: 3, Confident: 2, Unsure: 1, Split: 0 };
 
@@ -76,6 +94,9 @@ const filters = { mbti: [], typer: [], confidence: [] };
 let openMenuKey = null;      // which column's dropdown is open, if any
 let currentPersonId = null;  // whose panel is open
 let editingTypingId = null;  // which typing is being edited (null = adding a new one)
+let currentView = 'database';  // 'database' or 'types'
+let selectedType = null;       // the tile picked in the Types view
+let typesTyper = '';           // Types view "Typed by" filter ('' = everyone)
 
 headerButtons.forEach(function (button) {
   button.dataset.label = button.textContent;
@@ -392,6 +413,196 @@ function render() {
   }
 
   updateHeaderButtons();
+  renderTypes();
+}
+
+
+// ---------- 7b. The Types view (16-type grid) ----------
+
+// The typings that count in the Types view: everyone's, or just one typer's.
+function typingsInView(person) {
+  if (typesTyper === '') {
+    return person.typings;
+  }
+  return person.typings.filter(function (typing) {
+    return typing.typer === typesTyper;
+  });
+}
+
+// Everyone who has been typed as this type (by the chosen typer, if any).
+// (Someone split between INTJ and INFJ appears under both.)
+function peopleWithType(type) {
+  return allPeople.filter(function (person) {
+    return typingsInView(person).some(function (typing) {
+      return typing.mbti === type;
+    });
+  });
+}
+
+// Fill the "Typed by" dropdown with everyone who has typed someone.
+function fillTypesTyperSelect() {
+  const typers = [];
+  allPeople.forEach(function (person) {
+    person.typings.forEach(function (typing) {
+      if (!typers.includes(typing.typer)) {
+        typers.push(typing.typer);
+      }
+    });
+  });
+  typers.sort();
+
+  // If the chosen typer no longer exists (e.g. their typings were deleted), go back to everyone.
+  if (typesTyper !== '' && !typers.includes(typesTyper)) {
+    typesTyper = '';
+  }
+
+  fillSelect(typesTyperSelect, 'Everyone', typers);
+  typesTyperSelect.value = typesTyper;
+}
+
+function handleTypesTyperChange() {
+  typesTyper = typesTyperSelect.value;
+  selectedType = null;   // re-pick the biggest type for this typer
+  renderTypes();
+}
+
+function makeTypeTile(type, count) {
+  const tile = document.createElement('button');
+  tile.type = 'button';
+  tile.className = 'type-tile';
+  if (count === 0) {
+    tile.classList.add('empty-tile');
+  }
+  if (type === selectedType) {
+    tile.classList.add('selected');
+  }
+  tile.setAttribute('aria-pressed', type === selectedType ? 'true' : 'false');
+
+  const code = document.createElement('span');
+  code.className = 'tile-code';
+  code.textContent = type;
+
+  const number = document.createElement('span');
+  number.className = 'tile-count';
+  number.textContent = count;
+
+  function handleTileClick() {
+    selectedType = type;
+    renderTypes();
+  }
+  tile.addEventListener('click', handleTileClick);
+
+  tile.appendChild(code);
+  tile.appendChild(number);
+  return tile;
+}
+
+function makeTypePerson(person) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'type-person';
+
+  const name = document.createElement('span');
+  name.className = 'type-person-name';
+  name.textContent = person.name;
+
+  // e.g. "Typed by Alex Morgan [Certain]" or "2 typers · INTJ / INFJ [Split]"
+  const meta = document.createElement('span');
+  meta.className = 'type-person-meta';
+
+  if (typesTyper !== '') {
+    // Filtered to one typer: show how sure THEY are that this person is this type.
+    const theirTyping = typingsInView(person).find(function (typing) {
+      return typing.mbti === selectedType;
+    });
+    meta.textContent = 'Typed by ' + typesTyper;
+    meta.appendChild(makeConfidencePill(capitalise(theirTyping.confidence)));
+  } else {
+    const typers = distinctValues(person, 'typer');
+    const types = distinctValues(person, 'mbti');
+    let text = typers.length === 1 ? 'Typed by ' + typers[0] : typers.length + ' typers';
+    if (types.length > 1) {
+      text += ' · ' + types.join(' / ');
+    }
+    meta.textContent = text;
+    meta.appendChild(makeConfidencePill(summaryConfidence(person)));
+  }
+
+  function handleClick() {
+    openPerson(person.id);
+  }
+  button.addEventListener('click', handleClick);
+
+  button.appendChild(name);
+  button.appendChild(meta);
+  return button;
+}
+
+function renderTypes() {
+  fillTypesTyperSelect();
+
+  // Count everyone per type.
+  const counts = {};
+  TYPE_GRID_ORDER.forEach(function (type) {
+    counts[type] = peopleWithType(type).length;
+  });
+
+  // Nothing picked yet: start on the type with the most people.
+  if (selectedType === null) {
+    selectedType = TYPE_GRID_ORDER[0];
+    TYPE_GRID_ORDER.forEach(function (type) {
+      if (counts[type] > counts[selectedType]) {
+        selectedType = type;
+      }
+    });
+  }
+
+  typeGrid.innerHTML = '';
+  TYPE_GRID_ORDER.forEach(function (type) {
+    typeGrid.appendChild(makeTypeTile(type, counts[type]));
+  });
+
+  // The people under the picked tile, A to Z.
+  const people = peopleWithType(selectedType).sort(function (a, b) {
+    return a.name.localeCompare(b.name);
+  });
+
+  typeTitle.textContent = selectedType;
+  typeCount.textContent = people.length + (people.length === 1 ? ' person' : ' people');
+
+  typePeople.innerHTML = '';
+  if (people.length === 0) {
+    const none = document.createElement('p');
+    none.className = 'empty muted';
+    none.textContent = 'No one typed as ' + selectedType + ' yet.';
+    typePeople.appendChild(none);
+  }
+  people.forEach(function (person) {
+    typePeople.appendChild(makeTypePerson(person));
+  });
+}
+
+// Show one view and hide the other. The choice is kept in the address (#types),
+// so refreshing the page stays on the same view.
+function setView(view) {
+  currentView = view === 'types' ? 'types' : 'database';
+  closeMenu();
+
+  databaseView.hidden = currentView !== 'database';
+  typesView.hidden = currentView !== 'types';
+
+  viewTabs.forEach(function (tab) {
+    tab.setAttribute('aria-selected', tab.dataset.view === currentView ? 'true' : 'false');
+  });
+
+  const wantedHash = currentView === 'types' ? '#types' : '';
+  if (location.hash !== wantedHash) {
+    history.replaceState(null, '', location.pathname + wantedHash);
+  }
+}
+
+function handleTabClick(event) {
+  setView(event.currentTarget.dataset.view);
 }
 
 
@@ -867,6 +1078,12 @@ fillSelect(addType, 'Choose a type', TYPES);
 fillSelect(typingType, 'Choose a type', TYPES);
 fillSelect(addConfidence, 'How sure are you?', CONFIDENCE_LEVELS);
 fillSelect(typingConfidence, 'How sure are you?', CONFIDENCE_LEVELS);
+
+viewTabs.forEach(function (tab) {
+  tab.addEventListener('click', handleTabClick);
+});
+typesTyperSelect.addEventListener('change', handleTypesTyperChange);
+setView(location.hash === '#types' ? 'types' : 'database');
 
 headerButtons.forEach(function (button) {
   button.addEventListener('click', handleHeaderClick);

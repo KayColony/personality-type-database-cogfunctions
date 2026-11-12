@@ -332,6 +332,145 @@ h1 {
   margin: 0 auto;
 }
 
+/* ---------- Database / Types switch ---------- */
+.view-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+  border: 1px solid var(--ink);
+}
+
+.view-switch button {
+  height: 40px;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.view-switch button + button {
+  border-left: 1px solid var(--ink);
+}
+
+.view-switch button[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+
+/* ---------- Types view ---------- */
+.types-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.types-toolbar .field-label {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.types-toolbar .field {
+  flex-grow: 1;
+  margin-top: 0;
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.type-tile {
+  height: 64px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.type-tile .tile-code {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+.type-tile .tile-count {
+  font-size: 11px;
+}
+
+.type-tile.empty-tile {
+  border-color: var(--line);
+  color: #8a8a8a;
+}
+
+.type-tile.selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.type-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 28px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ink);
+}
+
+#type-title {
+  font-family: var(--serif);
+  font-size: 30px;
+}
+
+#type-count {
+  font-size: 13px;
+}
+
+.type-person {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.type-person:hover {
+  background: #fafafa;
+}
+
+.type-person-name {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.type-person-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 /* ---------- Clickable rows ---------- */
 #people-rows tr {
   cursor: pointer;

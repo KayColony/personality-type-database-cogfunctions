@@ -16,6 +16,14 @@
       <span id="people-count" class="muted"></span>
     </header>
 
+    <!-- Switch between the two views -->
+    <div class="view-switch" role="tablist" aria-label="View">
+      <button type="button" role="tab" id="tab-database" data-view="database" aria-selected="true">Database</button>
+      <button type="button" role="tab" id="tab-types" data-view="types" aria-selected="false">Types</button>
+    </div>
+
+    <!-- ========== Database view: the ledger table ========== -->
+    <section id="database-view">
     <label for="search" class="visually-hidden">Search</label>
     <input id="search" class="search" type="search" placeholder="Search names, types or typers" autocomplete="off">
 
@@ -46,6 +54,23 @@
       </div>
       <button type="button" id="menu-clear" class="menu-clear">Show all</button>
     </div>
+    </section>
+
+    <!-- ========== Types view: the 16-type grid ========== -->
+    <section id="types-view" hidden>
+      <div class="types-toolbar">
+        <label for="types-typer" class="field-label">Typed by</label>
+        <select id="types-typer" class="field"></select>
+      </div>
+
+      <div id="type-grid" class="type-grid"></div>
+
+      <div class="type-heading">
+        <span id="type-title"></span>
+        <span id="type-count" class="muted"></span>
+      </div>
+      <div id="type-people"></div>
+    </section>
 
     <div class="bottom-bar">
       <button type="button" id="open-add" class="primary">Add person</button>

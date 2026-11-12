@@ -11,7 +11,7 @@ const TYPES = [
   'ISTP', 'ISFP', 'ESTP', 'ESFP',
 ];
 
-const CONFIDENCE_LEVELS = ['certain', 'confident', 'unsure'];
+const CONFIDENCE_LEVELS = ['Certain', 'Confident', 'Unsure'];
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SECRET_KEY
@@ -53,7 +53,7 @@ function requirePassword(request, response, next) {
 async function getPeople(request, response) {
   const result = await supabase
     .from('main')
-    .select('name, mbti, typer, confidence')
+    .select('id, name, mbti, typer, confidence, created_at')
     .order('created_at', {ascending: true});
   
   if (result.error) {
@@ -88,7 +88,7 @@ async function addPerson(request, response) {
     return;
   }
   if (!CONFIDENCE_LEVELS.includes(confidence)) {
-    response.status(400).json({ error: 'Confidence must be certain, confident or unsure.' });
+    response.status(400).json({ error: 'Confidence must be Certain, Confident or Unsure.' });
     return;
   }
 
@@ -97,7 +97,7 @@ async function addPerson(request, response) {
   const result = await supabase
     .from('main')
     .insert(newPerson)
-    .select('name, mbti, typer, confidence')
+    .select('id, name, mbti, typer, confidence, created_at')
     .single();
 
   if (result.error) {
@@ -110,6 +110,27 @@ async function addPerson(request, response) {
 
 }
 
+async function deletePerson(request, response) {
+  const id = Number(request.params.id);
+
+  const result = await supabase
+    .from('main')
+    .delete()
+    .eq('id', id)
+    .select('id');
+
+  if (result.error) {
+    console.error(result.error);
+    response.status(500).json({ error: 'Could not delete person.' });
+    return;
+}
+
+  response.status(204).end();
+
+}
+
+
+
 // Runs once, when the server has started.
 function onServerStarted() {
   console.log('Server running at http://localhost:' + PORT);
@@ -119,5 +140,5 @@ function onServerStarted() {
 // Connect each path to the function that handles it.
 app.get('/people', getPeople);
 app.post('/people', addPerson);
-
+app.delete('/people/:id', deletePerson);
 app.listen(PORT, onServerStarted);

@@ -4,76 +4,100 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Type Database</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 480px;
-      margin: 40px auto;
-      padding: 0 16px;
-    }
-    label {
-      display: block;
-      margin-top: 16px;
-      font-weight: 600;
-    }
-    input, select, button {
-      font-size: 16px;
-      padding: 8px;
-      margin-top: 4px;
-    }
-    input, select {
-      width: 100%;
-      box-sizing: border-box;
-    }
-    button {
-      margin-top: 20px;
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Type Database</h1>
+  <main class="page">
+    <header class="page-header">
+      <h1>People</h1>
+      <span id="people-count" class="muted"></span>
+    </header>
 
-  <form id="person-form">
-    <label for="name">Name</label>
-    <input type="text" id="name" name="name" placeholder="e.g. Alice" required>
+    <label for="search" class="visually-hidden">Search</label>
+    <input id="search" class="search" type="search" placeholder="Search names, types or typers" autocomplete="off">
 
-    <label for="type">Type</label>
-    <select id="type" name="type" required>
-      <option value="">Choose a type</option>
-      <option>INTJ</option>
-      <option>INTP</option>
-      <option>ENTJ</option>
-      <option>ENTP</option>
-      <option>INFJ</option>
-      <option>INFP</option>
-      <option>ENFJ</option>
-      <option>ENFP</option>
-      <option>ISTJ</option>
-      <option>ISFJ</option>
-      <option>ESTJ</option>
-      <option>ESFJ</option>
-      <option>ISTP</option>
-      <option>ISFP</option>
-      <option>ESTP</option>
-      <option>ESFP</option>
-    </select>
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th class="col-name"><button type="button" class="sort" data-key="name">Name</button></th>
+          <th class="col-type"><button type="button" class="sort has-menu" data-key="mbti" aria-haspopup="true" aria-expanded="false">Type</button></th>
+          <th class="col-by"><button type="button" class="sort has-menu" data-key="typer" aria-haspopup="true" aria-expanded="false">By</button></th>
+          <th class="col-sure"><button type="button" class="sort has-menu" data-key="confidence" aria-haspopup="true" aria-expanded="false">Sure</button></th>
+          <th class="col-date"><button type="button" class="sort" data-key="created_at">Date</button></th>
+        </tr>
+      </thead>
+      <tbody id="people-rows"></tbody>
+    </table>
 
-    <label for="typer">Typed by</label>
-    <input type="text" id="typer" name="typer" placeholder="Who typed them?" required>
+    <p id="empty-message" class="empty muted" hidden></p>
 
-    <label for="confidence">Confidence</label>
-    <select id="confidence" name="confidence" required>
-      <option value="">How sure are you?</option>
-      <option value="certain">Certain</option>
-      <option value="confident">Confident</option>
-      <option value="unsure">Unsure</option>
-    </select>
+    <!-- One dropdown menu, reused by the Type, By and Sure headings. -->
+    <div id="column-menu" class="column-menu" role="dialog" aria-label="Sort and filter" hidden>
+      <div class="menu-section">
+        <button type="button" class="menu-sort" data-direction="up"></button>
+        <button type="button" class="menu-sort" data-direction="down"></button>
+      </div>
+      <div class="menu-section">
+        <div class="menu-heading">Show only</div>
+        <div id="menu-options"></div>
+      </div>
+      <button type="button" id="menu-clear" class="menu-clear">Show all</button>
+    </div>
 
-    <button type="submit">Add person</button>
-  </form>
+    <div class="bottom-bar">
+      <button type="button" id="open-add" class="primary">Add person</button>
+    </div>
+  </main>
 
-  <h2>People</h2>
-  <ul id="people-list"></ul>
+  <!-- Temporary: the add form opens in a pop-up until we design the add page. -->
+  <dialog id="add-dialog" class="add-dialog">
+    <form id="person-form" class="add-form">
+      <h2>New person</h2>
+
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required autocomplete="off">
+
+      <label for="type">Type</label>
+      <select id="type" name="type" required>
+        <option value="">Choose a type</option>
+        <option>INTJ</option>
+        <option>INTP</option>
+        <option>ENTJ</option>
+        <option>ENTP</option>
+        <option>INFJ</option>
+        <option>INFP</option>
+        <option>ENFJ</option>
+        <option>ENFP</option>
+        <option>ISTJ</option>
+        <option>ISFJ</option>
+        <option>ESTJ</option>
+        <option>ESFJ</option>
+        <option>ISTP</option>
+        <option>ISFP</option>
+        <option>ESTP</option>
+        <option>ESFP</option>
+      </select>
+
+      <label for="typer">Typed by</label>
+      <input type="text" id="typer" name="typer" required>
+
+      <label for="confidence">Confidence</label>
+      <select id="confidence" name="confidence" required>
+        <option value="">How sure are you?</option>
+        <option value="Certain">Certain</option>
+        <option value="Confident">Confident</option>
+        <option value="Unsure">Unsure</option>
+      </select>
+
+      <div class="form-buttons">
+        <button type="button" id="cancel-add" class="secondary">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="app.js"></script>
 </body>

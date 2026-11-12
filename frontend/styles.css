@@ -1,0 +1,377 @@
+/* ---------- Colours and fonts, defined once ---------- */
+:root {
+  --ink: #111111;
+  --muted: #5c5c5c;
+  --line: #e4e4e4;
+  --paper: #ffffff;
+  --certain: #15803d;    /* strong green */
+  --confident: #bbf7d0;  /* light green */
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: Inter, system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Hidden on screen but still read out by screen readers. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Page layout ---------- */
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 20px 120px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 1;
+}
+
+#people-count {
+  font-size: 13px;
+}
+
+.search {
+  width: 100%;
+  height: 44px;
+  margin-top: 24px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+/* ---------- The ledger table ---------- */
+.ledger {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.ledger th {
+  padding: 0;
+  border-bottom: 1px solid var(--ink);
+  text-align: left;
+  font-weight: 400;
+}
+
+.sort {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sort:hover,
+.sort.active {
+  color: var(--ink);
+}
+
+.ledger td {
+  height: 48px;
+  padding: 8px 0 8px 8px;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
+/* Only the person's name may wrap. Everything else stays on one line,
+   with "…" if it's ever too long. */
+.ledger td.col-type,
+.ledger td.col-by,
+.ledger td.col-sure,
+.ledger td.col-date {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Confidence colours ---------- */
+.pill {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.pill-certain {
+  background: var(--certain);
+  color: #ffffff;
+}
+
+.pill-confident {
+  background: var(--confident);
+  color: #14532d;   /* dark green text, readable on the light background */
+}
+
+.pill-unsure {
+  background: var(--paper);
+  color: var(--muted);
+  box-shadow: inset 0 0 0 1px #c8c8c8;
+}
+
+.ledger th {
+  padding-left: 8px;
+}
+
+.ledger th.col-name,
+.ledger td.col-name {
+  padding-left: 0;
+}
+
+.col-name { width: auto; }
+.col-type { width: 44px; }
+.col-by   { width: 92px; }
+.col-sure { width: 84px; }
+.col-date { width: 54px; text-align: right; }
+
+/* A heading with an active filter is shown in full black. */
+.sort.filtered {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- Column dropdown menu ---------- */
+.page {
+  position: relative;
+}
+
+.column-menu {
+  position: absolute;
+  z-index: 10;
+  width: 220px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.column-menu[hidden] {
+  display: none;
+}
+
+.menu-section {
+  border-bottom: 1px solid var(--line);
+  padding: 6px 0;
+}
+
+.menu-heading {
+  padding: 8px 14px 4px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-sort,
+.menu-clear {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-sort:hover,
+.menu-clear:hover,
+.menu-option:hover {
+  background: #f4f4f4;
+}
+
+.menu-sort.active {
+  font-weight: 600;
+}
+
+.menu-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.menu-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.menu-option .option-label {
+  flex-grow: 1;
+}
+
+.menu-option .option-count {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.menu-clear {
+  text-decoration: underline;
+}
+
+.ledger td.col-name {
+  font-weight: 500;
+}
+
+.ledger td.col-type {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.ledger td.col-by,
+.ledger td.col-sure,
+.ledger td.col-date {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.empty {
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* ---------- Buttons ---------- */
+.primary,
+.secondary {
+  height: 52px;
+  padding: 0 20px;
+  border-radius: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  border: 0;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.secondary {
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* The Add person button stays at the bottom of the screen. */
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px 20px 24px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--paper) 30%);
+}
+
+.bottom-bar .primary {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ---------- Temporary add pop-up ---------- */
+.add-dialog {
+  width: min(440px, calc(100% - 32px));
+  padding: 28px 24px 24px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+}
+
+.add-dialog::backdrop {
+  background: rgba(17, 17, 17, 0.45);
+}
+
+.add-form h2 {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 32px;
+}
+
+.add-form label {
+  display: block;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.add-form input,
+.add-form select {
+  width: 100%;
+  height: 44px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.form-buttons .primary {
+  flex-grow: 1;
+}
